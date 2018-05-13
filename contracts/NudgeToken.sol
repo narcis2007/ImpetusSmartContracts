@@ -83,9 +83,6 @@ contract StandardToken is ERC20, SafeMath {
     string public symbol;
     uint public decimals;
 
-    /* Token supply got increased and a new owner received these tokens */
-    event Minted(address receiver, uint amount);
-
     /* Actual balances of token holders */
     mapping(address => uint) balances;
 
@@ -334,13 +331,10 @@ contract Ownable {
 contract ReleasableToken is StandardToken, Ownable {
 
     /* The finalizer contract that allows unlift the transfer limits on this token */
-    address public releaseAgent;                                                           //TODO: set the owner as release agent on init
+    address public releaseAgent;
 
     /** A crowdsale contract can release us to the wild if ICO success. If false we are are in transfer lock up period.*/
     bool public released = false;
-
-    /** Map of agents that are allowed to transfer tokens regardless of the lock down period. These are crowdsale contracts and possible the team multisig itself. */
-    mapping (address => bool) public transferAgents;
 
     function ReleasableToken(){
         releaseAgent = msg.sender;
@@ -353,9 +347,7 @@ contract ReleasableToken is StandardToken, Ownable {
     modifier canTransfer(address _sender) {
 
         if(!released) {
-            if(!transferAgents[_sender]) {
-                revert();
-            }
+            revert();
         }
 
         _;
@@ -370,13 +362,6 @@ contract ReleasableToken is StandardToken, Ownable {
 
         // We don't do interface check here as we might want to a normal wallet address to act as a release agent
         releaseAgent = addr;
-    }
-
-    /**
-     * Owner can allow a particular address (a crowdsale contract) to transfer tokens despite the lock up period.
-     */
-    function setTransferAgent(address addr, bool state) onlyOwner inReleaseState(false) public {
-        transferAgents[addr] = state;
     }
 
     /**
@@ -530,14 +515,14 @@ contract LockableToken is ReleasableToken {
     mapping (address => bool) public lockAgents;
     mapping (address => uint) public amountsLocked;
     mapping (address => uint) public periodsLocked;
+    bool lockingActive = true;
 
     /**
      * Lock tokens from balance until a certain time.
      *
      */
-    function lockFrom(address who, uint amount, uint daysLocked) onlyLockAgent {
+    function lockFrom(address who, uint amount, uint daysLocked) onlyLockAgent isLockingActivated {
         require(balances[who] >= amount);
-        require(daysLocked > 0);
         require(daysLocked < 365); //don't lock more than a year
 
         balances[who] -= amount;
@@ -580,6 +565,17 @@ contract LockableToken is ReleasableToken {
         _;
     }
 
+    modifier isLockingActivated() {
+        if(!lockingActive) {
+            revert();
+        }
+        _;
+    }
+
+    function deactivateLockingForever() onlyOwner{
+        lockingActive = false;
+    }
+
     function setLockAgent(address who, bool isLockAgent) onlyOwner {
         lockAgents[who] = isLockAgent;
     }
@@ -587,11 +583,11 @@ contract LockableToken is ReleasableToken {
 
 
 
-contract ImpetusToken is LockableToken, CappedMintableToken, UpgradeableToken, BurnableToken {
+contract NudgeToken is LockableToken, CappedMintableToken, UpgradeableToken, BurnableToken {
 
-    function ImpetusToken() CappedMintableToken(6 * (10 ** (8 + 9))) UpgradeableToken(msg.sender){//6B - 8 for decimals and 9 for 1B
-        symbol = "IMP";
-        name = "Impetus";
+    function NudgeToken() CappedMintableToken(6 * (10 ** (8 + 9))) UpgradeableToken(msg.sender){
+        symbol = "NUDGE";
+        name = "NUDGE Token";
         decimals = 8;
 
     }

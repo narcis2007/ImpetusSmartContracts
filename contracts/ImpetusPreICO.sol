@@ -1,10 +1,10 @@
 pragma solidity ^0.4.20;
 
-import "./ImpetusToken.sol";
+import "./NudgeToken.sol";
 
 contract ImpeturPreICO is SafeMath, Ownable {
 
-    ImpetusToken impetusToken = ImpetusToken(0xdC03Ca9C3327f45e1FcD316CDF3C8E093ed668A4);
+    NudgeToken nudgeToken = NudgeToken(0xdC03Ca9C3327f45e1FcD316CDF3C8E093ed668A4);
 
     address public impetusAddress = 0x1d477fa6a6aa9aec8ee0bf30687baf8141e90358;
 
@@ -22,11 +22,11 @@ contract ImpeturPreICO is SafeMath, Ownable {
         uint bonus = (numberOfTokens * bonuses[msg.sender]) / 100;
         totalTokensSold += bonus;
 
-        require(totalTokensSold <= ((impetusToken.getSupplyCap() * 9) / 10));
+        require(totalTokensSold <= ((nudgeToken.getSupplyCap() * 9) / 10));
 
 
-        impetusToken.mint(msg.sender, numberOfTokens + bonus);
-        impetusToken.lockFrom(msg.sender, bonus, 1);            //TODO: change it to 6 months!!!!
+        nudgeToken.mint(msg.sender, numberOfTokens + bonus);
+        nudgeToken.lockFrom(msg.sender, bonus, 1);            //TODO: change it to 6 months!!!!
         impetusAddress.transfer(msg.value);
 
     }
@@ -70,6 +70,10 @@ contract ImpeturPreICO is SafeMath, Ownable {
 
     function setTokenPriceInSzabo(uint tokenPriceInSzabo) public onlyOwner {
         tokenPrice = tokenPriceInSzabo * 1 szabo;
+    }
+
+    function getTotalTokensSold() constant returns(uint){
+        return totalTokensSold;
     }
 
 }
