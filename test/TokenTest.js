@@ -129,6 +129,13 @@ contract('NudgeToken', async (accounts) => {
             await token.transfer(accounts[1], MAX_SUPPLY, { from: accounts[0] });
             assert.equal(await token.balanceOf(accounts[0]), 1 , "ballance incorrect");
             assert.equal((await token.balanceOf(accounts[1])).toString(), (MAX_SUPPLY.sub(1)).toString() , "ballance incorrect");
+
+            web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [17000000], id: 0})
+            web3.currentProvider.send({jsonrpc: "2.0", method: "evm_mine", params: [], id: 0})
+
+            await token.transfer(accounts[1], 1, { from: accounts[0] });
+            assert.equal(await token.balanceOf(accounts[0]), 0 , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[1])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
         });
 
         it('should be able to lock tokens and throw an exception if more tokens than the locked and unlocked ballance are transfered',async () => {

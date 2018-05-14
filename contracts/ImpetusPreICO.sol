@@ -10,7 +10,7 @@ contract ImpetusPreICO is SafeMath, Ownable {
 
     bool public isActive = false;
     uint public totalTokensSold = 0;
-    uint public tokenPrice = 1000 szabo;
+    uint public tokenPrice = 140000 wei;
 
     mapping(address => bool) public whitelistedAddresses;
     mapping(address => uint) public bonuses;
@@ -26,7 +26,7 @@ contract ImpetusPreICO is SafeMath, Ownable {
 
 
         nudgeToken.mint(msg.sender, numberOfTokens + bonus);
-        nudgeToken.lockFrom(msg.sender, bonus, 1);            //TODO: change it to 6 months!!!!
+        nudgeToken.lockFrom(msg.sender, bonus, 180);
         impetusAddress.transfer(msg.value);
 
     }
@@ -76,8 +76,8 @@ contract ImpetusPreICO is SafeMath, Ownable {
         return safeDiv(weisReceived, tokenPrice);
     }
 
-    function setTokenPriceInSzabo(uint tokenPriceInSzabo) public onlyOwner {
-        tokenPrice = tokenPriceInSzabo * 1 szabo;
+    function setSmallestTokenUnitPriceInWei(uint tokenPriceInWei) public onlyOwner {
+        tokenPrice = tokenPriceInWei * 1 wei;
     }
 
     function getTotalTokensSold() constant returns(uint){

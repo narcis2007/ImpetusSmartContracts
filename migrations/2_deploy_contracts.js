@@ -13,7 +13,7 @@ module.exports = function(deployer, network, accounts) {
     }).then(() => {
         deployer.deploy(ImpetusPreICO, { from: accounts[0], gas: 4700000 }).then(() => {
             return ImpetusPreICO.deployed().then(instance => {
-                // set token addr
+                    instance.setNudgeToken(token.address)
                  })
         })
     })
