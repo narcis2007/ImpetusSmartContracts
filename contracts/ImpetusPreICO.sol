@@ -2,7 +2,7 @@ pragma solidity ^0.4.20;
 
 import "./NudgeToken.sol";
 
-contract ImpeturPreICO is SafeMath, Ownable {
+contract ImpetusPreICO is SafeMath, Ownable {
 
     NudgeToken nudgeToken = NudgeToken(0xdC03Ca9C3327f45e1FcD316CDF3C8E093ed668A4);
 
@@ -58,6 +58,14 @@ contract ImpeturPreICO is SafeMath, Ownable {
         revert();
 
         _;
+    }
+
+    function setNudgeToken(address addr) onlyOwner {
+        nudgeToken = NudgeToken(addr);
+    }
+
+    function setImpetusAddress(address addr) onlyOwner {
+        impetusAddress = addr;
     }
 
     /**
