@@ -302,10 +302,10 @@ contract('NudgeToken', async (accounts) => {
             assert.equal(expectedBalance, final_balance, "Supply after burn do not fit.");
 
             const event = logs.find(e => e.event === 'Burned');
-            assert.notEqual(event, undefined, "Event Burn not fired!")
+            assert.notEqual(event, undefined, "Event Burned not fired!")
         });
 
-        it('Cant not burn more tokens than your balance', async function () {
+        it('Can not burn more tokens than your balance', async function () {
             let token = await NudgeToken.new();
             let totalSupply = await token.totalSupply();
             let luckys_burnable_amount = totalSupply + 1;
