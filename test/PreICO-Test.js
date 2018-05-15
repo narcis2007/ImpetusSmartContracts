@@ -7,7 +7,6 @@ const BigNumber = require('bignumber.js')
 var NudgeToken = artifacts.require("NudgeToken");
 var ImpetusPreICO = artifacts.require("ImpetusPreICO");
 
-
 contract('ImpetusPreICO', async (accounts) => {
 
     describe('pre-ico safety checks', function() {
@@ -44,6 +43,13 @@ contract('ImpetusPreICO', async (accounts) => {
             await token.setLockAgent(preIco.address, true);
             await preIco.setNudgeToken(token.address);
 
+            try {
+                await preIco.send(web3.toWei(1000, "szabo" ));
+                assert.fail("should have thrown an error")
+            } catch (error) {
+                //ok
+            }
+
             await preIco.startPreICO();
             preIco.setSmallestTokenUnitPriceInWei(web3.toWei(1000, "szabo") / (10 ** 8));
 
@@ -73,7 +79,8 @@ contract('ImpetusPreICO', async (accounts) => {
 
             preIco.setSmallestTokenUnitPriceInWei(web3.toWei(1000, "szabo") / (10 ** 8));
 
-            await preIco.send(web3.toWei(1000, "szabo" ));
+            await preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1000, "szabo") });
+
 
             assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString());
 
@@ -88,14 +95,76 @@ contract('ImpetusPreICO', async (accounts) => {
         });
     });
 
-    // describe('full pre-ico flow', function() {
-    //
-    //     it('should return the correct supplyCap after construction',async () => {
-    //         let token = await NudgeToken.new();
-    //         let preIco = await ImpetusPreICO.new();
-    //         await token.setMintAgent(preIco.address, true);
-    //         await preIco.setNudgeToken(token.address);
-    //
-    //     });
-    // });
+    describe('full pre-ico flow', function() {
+
+        it('should work', async () => {
+            let token = await NudgeToken.new();
+            let preIco = await ImpetusPreICO.new();
+            await token.setMintAgent(preIco.address, true);
+            await token.setLockAgent(preIco.address, true);
+            await preIco.setNudgeToken(token.address);
+            await preIco.setImpetusAddress(accounts[9]);
+
+            preIco.setSmallestTokenUnitPriceInWei(125000); //Price: 0.0000125 ETH/NUDGE - 80,000 NUDGE/ETH
+
+
+            await preIco.whiteListAddress(accounts[0], true, 0);
+
+            await preIco.whiteListAddress(accounts[1], true, 30);
+
+            await preIco.startPreICO();
+
+            try {
+                await preIco.sendTransaction({ from: accounts[8], value: web3.toWei(100, "ether") });
+                assert.fail("should have thrown an error")
+            } catch (error) {
+                //ok
+            }
+            assert.equal((await web3.eth.getBalance(accounts[9])).toString(), new BigNumber(web3.toWei(100, "ether")).toString(), "amount of ETH incorrect");
+            assert.equal((await web3.eth.getBalance(accounts[8])).toString(), new BigNumber(web3.toWei(100, "ether")).toString(), "amount of ETH incorrect");
+
+            await preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1, "ether") }); // contribute with 1 ETH
+
+            assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString()); //should recevie 80 000 whole tokens
+
+            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal(await token.amountsLocked(accounts[0]), 0, "amount locked incorrect");
+
+
+            await preIco.sendTransaction({ from: accounts[1], value: web3.toWei(1, "ether") });
+            //should recevie 80 000 whole tokens and 30% bonus locked
+            assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(160000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString());
+
+            assert.equal((await token.balanceOf(accounts[1])).toString(), new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal(await token.amountsLocked(accounts[1]), new BigNumber(8000 * 3).mul(new BigNumber('10').pow(8)).toString(), "amount locked incorrect");
+
+
+            assert.equal((await web3.eth.getBalance(accounts[9])).toString(), new BigNumber(web3.toWei(102, "ether")).toString(), "amount of ETH incorrect");
+
+            //should not be able to transfer untill the token is released
+            try {
+                await token.transfer(accounts[1], new BigNumber(80000).mul(new BigNumber('10').pow(8)), { from: accounts[0] });
+                assert.fail("should have thrown an error")
+            } catch (error) {
+                //ok
+            }
+            await preIco.finalizePreICO();
+            try {
+                await preIco.sendTransaction({ from: accounts[1], value: web3.toWei(1, "ether") });
+                assert.fail("should have thrown an error")
+            } catch (error) {
+                //ok
+            }
+
+            await token.deactivateLockingForever();
+
+            await token.releaseTokenTransfer();
+
+            await token.transfer(accounts[2], new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)), { from: accounts[1] });
+            assert.equal((await token.balanceOf(accounts[1])).toString(), new BigNumber(80000 * 30 / 100).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+
+            assert.equal((await token.balanceOf(accounts[2])).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+
+        });
+    });
 });

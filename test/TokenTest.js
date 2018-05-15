@@ -2,14 +2,17 @@
  * Created by Narcis2007 on 12.05.2018.
  */
 'use strict';
+
 const BigNumber = require('bignumber.js')
 var NudgeToken = artifacts.require("NudgeToken");
 
 
 contract('NudgeToken', async (accounts) => {
+
     const MAX_SUPPLY = new BigNumber('6').mul(new BigNumber('10').pow(8 +9));
 
     describe('token', function() {
+
         it('should return the correct supplyCap after construction',async () => {
             let token = await NudgeToken.new()
             let totalSupply = await token.getSupplyCap()
@@ -36,6 +39,7 @@ contract('NudgeToken', async (accounts) => {
     });
 
     describe('transfers', function () {
+
         it('should allow transfer() 100 NUDGE units from accounts[0] to accounts[1]', async function() {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
@@ -87,6 +91,7 @@ contract('NudgeToken', async (accounts) => {
     });
 
     describe('minting', function () {
+
         it('should throw an error when trying to mint more than the maximum supply cap', async function () {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
@@ -115,6 +120,7 @@ contract('NudgeToken', async (accounts) => {
     });
 
     describe('lock', function() {
+
         it('should be able to lock tokens and transfer only those available',async () => {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
@@ -167,7 +173,7 @@ contract('NudgeToken', async (accounts) => {
 
             assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
-            await token.deactivateLockingForever()
+            await token.deactivateLockingForever();
             try {
                 await token.lockFrom(accounts[0], 1, 1);
                 assert.fail("should have thrown an error")
@@ -195,6 +201,7 @@ contract('NudgeToken', async (accounts) => {
     });
 
     describe('allowance', function () {
+
         it('should return the correct allowance amount after approval', async function () {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
@@ -276,6 +283,7 @@ contract('NudgeToken', async (accounts) => {
     });
 
     describe('burnable', function () {
+
         it('owner should be able to burn tokens', async function () {
             let token                = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
@@ -296,6 +304,7 @@ contract('NudgeToken', async (accounts) => {
             const event = logs.find(e => e.event === 'Burned');
             assert.notEqual(event, undefined, "Event Burn not fired!")
         });
+
         it('Cant not burn more tokens than your balance', async function () {
             let token = await NudgeToken.new();
             let totalSupply = await token.totalSupply();
