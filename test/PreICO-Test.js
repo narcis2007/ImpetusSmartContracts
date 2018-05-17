@@ -35,6 +35,25 @@ contract('ImpetusPreICO', async (accounts) => {
             }
         });
 
+        it('should only allow a bonus of up to 30%',async () => {
+            let preIco = await ImpetusPreICO.new();
+
+            await preIco.whiteListAddress(accounts[0], true, 30);
+
+            assert.equal(await preIco.whitelistedAddresses(accounts[0]), true);
+
+            try {
+                await preIco.whiteListAddress(accounts[1], true, 31);
+                assert.fail("should have thrown an error")
+            } catch (error) {
+                //ok
+            }
+
+            await preIco.whiteListAddress(accounts[2], true, 1);
+            assert.equal(await preIco.whitelistedAddresses(accounts[2]), true);
+
+        });
+
         it('should only allow contribution once the pre-ico is active',async () => {
             let preIco = await ImpetusPreICO.new();
             let token = await NudgeToken.new();

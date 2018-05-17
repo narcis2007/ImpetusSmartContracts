@@ -32,6 +32,7 @@ contract ImpetusPreICO is SafeMath, Ownable {
     }
 
     function whiteListAddress(address addr, bool whitelisted, uint bonus) onlyOwner public {
+        require(bonus <= 30);
         whitelistedAddresses[addr] = whitelisted;
         bonuses[addr] = bonus;
 
