@@ -3,13 +3,14 @@
  */
 'use strict';
 
+const expectThrow = require('./expectThrow.js')
 const BigNumber = require('bignumber.js')
 var NudgeToken = artifacts.require("NudgeToken");
 
 
 contract('NudgeToken', async (accounts) => {
 
-    const MAX_SUPPLY = new BigNumber('6').mul(new BigNumber('10').pow(8 +9));
+    const MAX_SUPPLY = new BigNumber('3780000000').mul(new BigNumber('10').pow(8));
 
     describe('token', function() {
 
@@ -69,24 +70,14 @@ contract('NudgeToken', async (accounts) => {
             await token.releaseTokenTransfer();
             let accountStartingBalance = await token.balanceOf(accounts[1]);
             let amount = accountStartingBalance + 1;
-            try {
-                await token.transfer(accounts[2], amount, { from: accounts[1] });
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.transfer(accounts[2], amount, { from: accounts[1] }));
         });
 
         it('should throw an error when trying to transfer when the token is not yet released', async function () {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
             await token.mint(accounts[1], MAX_SUPPLY);
-            try {
-                await token.transfer(accounts[2], 1, { from: accounts[1] });
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.transfer(accounts[2], 1, { from: accounts[1] }));
         });
     });
 
@@ -95,12 +86,7 @@ contract('NudgeToken', async (accounts) => {
         it('should throw an error when trying to mint more than the maximum supply cap', async function () {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
-            try {
-                await token.mint(accounts[1], MAX_SUPPLY +1);
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.mint(accounts[1], MAX_SUPPLY +1));
             assert.equal(await token.totalSupply(), 0, "totalSupply not 0")
         });
 
@@ -109,12 +95,7 @@ contract('NudgeToken', async (accounts) => {
             await token.setMintAgent(accounts[0], true);
             await token.mint(accounts[1], 1);
             await token.stopMintingForever();
-            try {
-                await token.mint(accounts[1], 1);
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow( token.mint(accounts[1], 1));
             assert.equal(await token.totalSupply(), 1, "totalSupply incorrect")
         });
     });
@@ -155,12 +136,7 @@ contract('NudgeToken', async (accounts) => {
 
             assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.sub(10).toString() , "ballance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
-            try {
-                await token.transfer(accounts[1], MAX_SUPPLY.sub(1), { from: accounts[0] });
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow( token.transfer(accounts[1], MAX_SUPPLY.sub(1), { from: accounts[0] }));
         });
 
         it('should not be able to lock tokens after this function has been deactivated',async () => {
@@ -174,12 +150,7 @@ contract('NudgeToken', async (accounts) => {
             assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
             await token.deactivateLockingForever();
-            try {
-                await token.lockFrom(accounts[0], 1, 1);
-                assert.fail("should have thrown an error")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.lockFrom(accounts[0], 1, 1));
         });
 
         it('should be able to lock twice or more',async () => {
@@ -259,12 +230,7 @@ contract('NudgeToken', async (accounts) => {
             await token.approve(accounts[1], amount);
 
             let overflowed_amount = amount + 1;
-            try {
-                await token.transferFrom(accounts[0], accounts[2], overflowed_amount, {from: accounts[1]})
-                assert.fail("Should throw an error because has tried to send more amount than the amount allowed!")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.transferFrom(accounts[0], accounts[2], overflowed_amount, {from: accounts[1]}));
         })
 
         it('should throw an error when trying to transfer from not allowed account', async function() {
@@ -273,12 +239,7 @@ contract('NudgeToken', async (accounts) => {
             await token.mint(accounts[0], MAX_SUPPLY);
             await token.releaseTokenTransfer();
             let amount = 100;
-            try {
-                await token.transferFrom(accounts[0], accounts[2], amount, {from: accounts[1]})
-                assert.fail("Should throw an error because has tried to send from now allowed account!")
-            } catch (error) {
-                //ok
-            }
+            await expectThrow( token.transferFrom(accounts[0], accounts[2], amount, {from: accounts[1]}))
         })
     });
 
@@ -309,12 +270,7 @@ contract('NudgeToken', async (accounts) => {
             let token = await NudgeToken.new();
             let totalSupply = await token.totalSupply();
             let luckys_burnable_amount = totalSupply + 1;
-            try {
-                await token.burn(luckys_burnable_amount);
-                assert.fail("Should throw an error 'cuz we are trying to burn more than available supply.");
-            } catch (error) {
-                //ok
-            }
+            await expectThrow(  token.burn(luckys_burnable_amount));
         });
     });
 });

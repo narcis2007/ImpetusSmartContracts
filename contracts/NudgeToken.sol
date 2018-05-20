@@ -129,7 +129,7 @@ contract StandardToken is ERC20, SafeMath {
         //  allowance to zero by calling `approve(_spender, 0)` if it is not
         //  already 0 to mitigate the race condition described here:
         //  https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-        if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) throw;
+        if ((_value != 0) && (allowed[msg.sender][_spender] != 0)) revert();
 
         allowed[msg.sender][_spender] = _value;
         Approval(msg.sender, _spender, _value);
@@ -585,7 +585,7 @@ contract LockableToken is ReleasableToken {
 
 contract NudgeToken is LockableToken, CappedMintableToken, UpgradeableToken, BurnableToken {
 
-    function NudgeToken() CappedMintableToken(6 * (10 ** (8 + 9))) UpgradeableToken(msg.sender){
+    function NudgeToken() CappedMintableToken(378 * (10 ** (7 + 8))) UpgradeableToken(msg.sender){
         symbol = "NUDGE";
         name = "NUDGE Token";
         decimals = 8;
