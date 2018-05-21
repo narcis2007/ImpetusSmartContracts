@@ -534,6 +534,19 @@ contract LockableToken is ReleasableToken {
         periodsLocked[who] = releaseTime;
     }
 
+    function lockFromForMinutes(address who, uint amount, uint minutesLocked) onlyLockAgent isLockingActivated {
+        require(balances[who] >= amount);
+        require(minutesLocked < 60); //don't lock more than an hour
+
+        balances[who] -= amount;
+        amountsLocked[who] += amount;
+        uint releaseTime = now + (minutesLocked * 1 minutes);
+        if(periodsLocked[who] > releaseTime) //if that address has tokens locked take the longest period
+        releaseTime = periodsLocked[who];
+
+        periodsLocked[who] = releaseTime;
+    }
+
     function transfer(address _to, uint _value) returns (bool success) {
         return super.transfer(_to, tryToUnlockAndGetAvailableBallance(msg.sender, _value));
     }

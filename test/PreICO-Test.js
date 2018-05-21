@@ -108,7 +108,48 @@ contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
             assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
 
             assert.equal((await web3.eth.getBalance(accounts[3])).toString(), new BigNumber(web3.toWei(101, "ether")).toString(), "amount of ETH received incorrect");
+        });
 
+        it('should allow only a certain number of tokens to be sold',async () => {
+            let preIco = await ImpetusPreICO.new();
+            let token = await NudgeToken.new();
+            await preIco.whiteListAddress(accounts[0], true, 0, 1);
+            await token.setMintAgent(preIco.address, true);
+            await preIco.setNudgeToken(token.address);
+            await preIco.startPreICO();
+
+            preIco.setSmallestTokenUnitPriceInWei(web3.toWei(5, "wei"));
+
+            await expectThrow( preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1, "ether"), gasPrice: web3.toWei(1, "gwei") }));
+
+            preIco.setSmallestTokenUnitPriceInWei(web3.toWei(6, "wei"));
+
+            await expectThrow( preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1, "wei"), gasPrice: web3.toWei(1, "gwei") }));
+
+            await preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1, "ether"), gasPrice: web3.toWei(1, "gwei") });
+
+            assert.equal((await preIco.getTotalTokensSold()).toString(), '166666666666666666');
+
+        });
+
+        it('should allow only a certain number of bonus tokens to be sold',async () => {
+            let preIco = await ImpetusPreICO.new();
+            let token = await NudgeToken.new();
+            await preIco.whiteListAddress(accounts[0], true, 30, 1);
+            await preIco.whiteListAddress(accounts[1], true, 9, 1);
+            await token.setMintAgent(preIco.address, true);
+            await preIco.setNudgeToken(token.address);
+            await preIco.startPreICO();
+
+            preIco.setSmallestTokenUnitPriceInWei(web3.toWei(6, "wei"));
+
+            await expectThrow( preIco.sendTransaction({ from: accounts[0], value: web3.toWei(1, "ether"), gasPrice: web3.toWei(1, "gwei") }));
+
+            preIco.setSmallestTokenUnitPriceInWei(web3.toWei(6, "wei"));
+
+            await preIco.sendTransaction({ from: accounts[1], value: web3.toWei(1, "ether"), gasPrice: web3.toWei(1, "gwei") });
+
+            assert.equal((await preIco.getBonusTokensSold())>0, true);
 
         });
     });
