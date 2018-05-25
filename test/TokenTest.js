@@ -110,22 +110,22 @@ contract('NudgeToken', async (accounts) => {
             await token.setLockAgent(accounts[0], true);
             await token.lockFrom(accounts[0], 1, 1); //lock from acc[0] 1 token for 1 day
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "balance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
 
             await token.transfer(accounts[1], MAX_SUPPLY, { from: accounts[0] });
-            assert.equal(await token.balanceOf(accounts[0]), 1 , "ballance incorrect");
-            assert.equal((await token.balanceOf(accounts[1])).toString(), (MAX_SUPPLY.sub(1)).toString() , "ballance incorrect");
+            assert.equal(await token.balanceOf(accounts[0]), 1 , "balance incorrect");
+            assert.equal((await token.balanceOf(accounts[1])).toString(), (MAX_SUPPLY.sub(1)).toString() , "balance incorrect");
 
             web3.currentProvider.send({jsonrpc: "2.0", method: "evm_increaseTime", params: [17000000], id: 0})
             web3.currentProvider.send({jsonrpc: "2.0", method: "evm_mine", params: [], id: 0})
 
             await token.transfer(accounts[1], 1, { from: accounts[0] });
-            assert.equal(await token.balanceOf(accounts[0]), 0 , "ballance incorrect");
-            assert.equal((await token.balanceOf(accounts[1])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
+            assert.equal(await token.balanceOf(accounts[0]), 0 , "balance incorrect");
+            assert.equal((await token.balanceOf(accounts[1])).toString(), MAX_SUPPLY.toString() , "balance incorrect");
         });
 
-        it('should be able to lock tokens and throw an exception if more tokens than the locked and unlocked ballance are transfered',async () => {
+        it('should be able to lock tokens and throw an exception if more tokens than the locked and unlocked balance are transfered',async () => {
             let token = await NudgeToken.new();
             await token.setMintAgent(accounts[0], true);
             await token.mint(accounts[0], MAX_SUPPLY.sub(10));
@@ -134,7 +134,7 @@ contract('NudgeToken', async (accounts) => {
             await token.setLockAgent(accounts[0], true);
             await token.lockFrom(accounts[0], 1, 1); //lock from acc[0] 1 token for 1 day
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.sub(10).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.sub(10).toString() , "balance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
             await expectThrow( token.transfer(accounts[1], MAX_SUPPLY.sub(1), { from: accounts[0] }));
         });
@@ -147,7 +147,7 @@ contract('NudgeToken', async (accounts) => {
             await token.setLockAgent(accounts[0], true);
             await token.lockFrom(accounts[0], 1, 1); //lock from acc[0] 1 token for 1 day
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "balance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 1, "amount locked incorrect");
             await token.deactivateLockingForever();
             await expectThrow(  token.lockFrom(accounts[0], 1, 1));
@@ -162,7 +162,7 @@ contract('NudgeToken', async (accounts) => {
             await token.lockFrom(accounts[0], 1, 1); //lock from acc[0] 1 token for 0 days
             await token.lockFrom(accounts[0], 1, 2); //lock from acc[0] 1 token for 0 days
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), MAX_SUPPLY.toString() , "balance incorrect");
             assert.equal(await token.amountsLocked(accounts[0]), 2, "amount locked incorrect");
 
         });

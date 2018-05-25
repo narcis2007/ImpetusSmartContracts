@@ -83,7 +83,7 @@ contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
             assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString());
             assert.equal((await preIco.getNormalTokensSold()).toString(), new BigNumber(1).mul(new BigNumber('10').pow(8)).toString());
             assert.equal((await preIco.getBonusTokensSold()).toString(), new BigNumber(0.2).mul(new BigNumber('10').pow(8)).toString());
-            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString() , "balance incorrect");
             assert.equal((await web3.eth.getBalance(accounts[1])).toString(), new BigNumber(web3.toWei(101, "ether")).toString(), "amount of ETH received incorrect");
         });
 
@@ -105,7 +105,7 @@ contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
             assert.equal((await preIco.getNormalTokensSold()).toString(), new BigNumber(1).mul(new BigNumber('10').pow(8)).toString());
             assert.equal((await preIco.getBonusTokensSold()).toString(), new BigNumber(0.2).mul(new BigNumber('10').pow(8)).toString());
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(1.2).mul(new BigNumber('10').pow(8)).toString() , "balance incorrect");
 
             assert.equal((await web3.eth.getBalance(accounts[3])).toString(), new BigNumber(web3.toWei(101, "ether")).toString(), "amount of ETH received incorrect");
         });
@@ -181,13 +181,13 @@ contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
 
             assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString()); //should recevie 80 000 whole tokens
 
-            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[0])).toString(), new BigNumber(80000).mul(new BigNumber('10').pow(8)).toString() , "balance incorrect");
 
             await preIco.sendTransaction({ from: accounts[1], value: web3.toWei(1, "ether") });
             //should recevie 80 000 whole tokens and 30% bonus
             assert.equal((await preIco.getTotalTokensSold()).toString(), new BigNumber(160000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString());
 
-            assert.equal((await token.balanceOf(accounts[1])).toString(), new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[1])).toString(), new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString() , "balance incorrect");
 
 
             assert.equal((await web3.eth.getBalance(accounts[9])).toString(), new BigNumber(web3.toWei(102, "ether")).toString(), "amount of ETH incorrect");
@@ -201,9 +201,9 @@ contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
             await token.releaseTokenTransfer();
 
             await token.transfer(accounts[2], new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)), { from: accounts[1] });
-            assert.equal((await token.balanceOf(accounts[1])).toString(), 0 , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[1])).toString(), 0 , "balance incorrect");
 
-            assert.equal((await token.balanceOf(accounts[2])).toString(), new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString() , "ballance incorrect");
+            assert.equal((await token.balanceOf(accounts[2])).toString(), new BigNumber(80000 + (80000 * 30 / 100)).mul(new BigNumber('10').pow(8)).toString() , "balance incorrect");
 
         });
     });
