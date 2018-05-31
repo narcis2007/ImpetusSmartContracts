@@ -8,7 +8,7 @@ const expectThrow = require('./expectThrow.js')
 var NudgeToken = artifacts.require("NudgeToken");
 var ImpetusPreICO = artifacts.require("ImpetusPreICO");
 
-contract('ImpetusPreICO', async (accounts) => { //todo: verific whitelist amount
+contract('ImpetusPreICO', async (accounts) => { 
 
     describe('pre-ico safety checks', function() {
 
